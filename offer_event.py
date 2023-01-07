@@ -12,6 +12,7 @@ plugin = crescent.Plugin()
 class SetupOffer:
     category = crescent.option(hikari.GuildCategory, description="Канал, в котором люди будут создавать временные каналы")
     title = crescent.option(str, description="Название канала")
+    header_role = crescent.option(hikari.Role, description="Роль главы структуры")
 
     async def callback(self, ctx: crescent.Context):
         channel = await ctx.guild.create_text_channel(self.title, category=self.category.id)
@@ -20,13 +21,14 @@ class SetupOffer:
         message = await channel.send(self.title, components=view)
         database.insert(
                 'offer_channels', 
-                category_id=self.category.id, channel_id=channel.id, message_id=message.id
+                category_id=self.category.id, channel_id=channel.id, message_id=message.id,
+                header_role_id=self.header_role.id
         )
         await view.start(message)
         view.stop()
         await ctx.respond('Канал создан', flags=hikari.MessageFlag.EPHEMERAL)
 
-async def on_interaction(category_id, specialty_role_id, interaction: hikari.ComponentInteraction):
+async def on_interaction(category_id, interaction: hikari.ComponentInteraction):
     if database.select(
             'users_channels', 
             user_id=interaction.user.id, 
@@ -40,7 +42,11 @@ async def on_interaction(category_id, specialty_role_id, interaction: hikari.Com
         return
 
     guild = interaction.get_guild()
-    specialty_role = guild.get_role(specialty_role_id)
+    specialty_role = database.select(
+            'offer_channels', 'header_role_id', 
+            message_id=interaction.message.id
+    )
+    specialty_role = guild.get_role(specialty_role[0][0])
     everyone = None
     for role in guild.get_roles().values():
         if role.name == '@everyone':

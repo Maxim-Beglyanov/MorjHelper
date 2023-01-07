@@ -40,16 +40,9 @@ class SetupGiveRole:
         await view.start(message)
         view.stop()
 
-async def on_interaction(specialty_role_id, interaction: hikari.ComponentInteraction):
+async def on_interaction(interaction: hikari.ComponentInteraction):
     roles = set(interaction.member.get_roles())
     guild = interaction.get_guild()
-    if (specialty_role := guild.get_role(specialty_role_id)) in roles:
-        await interaction.create_initial_response(
-            hikari.ResponseType.MESSAGE_CREATE, 
-            f'Вы имеете роль {specialty_role.name}',
-            flags=hikari.MessageFlag.EPHEMERAL
-        )
-        return
     if give_time := database.select(
         'given_user_roles', 'give_time',
         give_role_message_id=interaction.message.id,

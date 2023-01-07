@@ -1,7 +1,8 @@
 CREATE TABLE offer_channels(
     category_id VARCHAR(64) NOT NULL,
     channel_id VARCHAR(64) NOT NULL,
-    message_id VARCHAR(64) PRIMARY KEY
+    message_id VARCHAR(64) PRIMARY KEY,
+    header_role_id VARCHAR(64) NOT NULL
 );
 
 CREATE TABLE users_channels(
@@ -44,7 +45,6 @@ CREATE TABLE polls_votes(
 );
 
 CREATE TABLE config(
-    specialty_head_role_id VARCHAR(64),
     embed_color VARCHAR(32)
 );
-INSERT INTO config VALUES('', '');
+INSERT INTO config VALUES('');
